@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 public class Usuario {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // Melhor para MySQL
+    @GeneratedValue(strategy = GenerationType.IDENTITY) 
     private Long id;
 
     private String nome;
@@ -23,7 +23,7 @@ public class Usuario {
 
     @PrePersist
     protected void onCreate() {
-        dataCadastro = LocalDateTime.now(); // Define a data de criação automaticamente
+        dataCadastro = LocalDateTime.now();
     }
 
     // Getters e Setters
