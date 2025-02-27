@@ -40,14 +40,8 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="text-center">
-        <Link
-          to="/books"
-          className="vintage-button px-8 py-3 rounded-lg font-serif text-lg inline-flex items-center hover:shadow-lg transition-all"
-        >
-          Explorar Biblioteca
-        </Link>
-      </div>
+    
+    
     </div>
   );
 }

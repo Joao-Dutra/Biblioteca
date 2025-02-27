@@ -16,9 +16,7 @@ export default function Navbar() {
           </Link>
           
           <div className="flex items-center space-x-6">
-            <Link to="/books" className="text-[#f8f3e7] hover:text-[#d4a373] transition-colors font-serif">
-              Livros
-            </Link>
+          
             <Link to="/add-book" className="text-[#f8f3e7] hover:text-[#d4a373] transition-colors font-serif flex items-center">
               <PlusCircle className="h-5 w-5 mr-1" />
               Adicionar Livro
