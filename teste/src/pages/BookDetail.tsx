@@ -1,205 +1,198 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { Star, BookOpen, MessageCircle } from "lucide-react";
+import { Star, BookOpen, MessageCircle, RefreshCw } from "lucide-react";
 import ExchangeModal from "../components/ExchangeModal";
-
-interface Book {
-  id: number;
-  titulo: string;
-  autor: string;
-  descricao: string;
-  estado_conservacao: string;
-  usuario_id: number;
-}
 
 interface Review {
   id: number;
-  usuario_id: number;
-  livro_id: number;
-  avaliacao: number;
-  comentario: string;
-  data: string;
+  conteudo: string;
+  dataPublicacao: string;
+  usuario: {
+    id: number;
+    nome: string;
+  };
 }
 
 export default function BookDetail() {
-  const { id } = useParams<{ id: string }>();
-  const [book, setBook] = useState<Book | null>(null);
+  const { id } = useParams<{ id: string }>(); // Obtém o ID do livro pela URL
+  const [book, setBook] = useState<any>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [newReview, setNewReview] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [exchangeRequested, setExchangeRequested] = useState(false);
-  const [newReview, setNewReview] = useState({
-    avaliacao: 5,
-    comentario: "",
-  });
 
   useEffect(() => {
     if (!id) return;
 
-    // Buscar detalhes do livro
+    // Busca detalhes do livro pelo ID
     fetch(`http://localhost:8080/livros/${id}`)
       .then((response) => response.json())
-      .then((data: Book) => setBook(data))
+      .then((data) => setBook(data))
       .catch((error) => console.error("Erro ao buscar livro:", error));
 
-    // Buscar avaliações do livro pelo ID
-    fetch(`http://localhost:8080/avaliacoes/livro/${id}`)
+    // Busca resenhas do livro
+    fetch(`http://localhost:8080/resenhas/livro/${id}`)
       .then((response) => response.json())
-      .then((data: Review[]) => setReviews(data))
-      .catch((error) => console.error("Erro ao buscar avaliações:", error));
+      .then((data) => setReviews(data))
+      .catch((error) => console.error("Erro ao buscar resenhas:", error));
   }, [id]);
 
+  // Função para enviar nova resenha
+  const handleReviewSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newReview.trim()) return; // Evita envio de resenhas vazias
+
+    const userId = localStorage.getItem("userId"); // Obtém ID do usuário logado
+    if (!userId) {
+      alert("Erro: Usuário não autenticado.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const response = await fetch("http://localhost:8080/resenhas", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`, // Se necessário
+        },
+        body: JSON.stringify({
+          conteudo: newReview,
+          usuario: { id: parseInt(userId) },
+          livro: { id: parseInt(id!) },
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Erro ao enviar resenha.");
+      }
+
+      const savedReview = await response.json();
+      setReviews([...reviews, savedReview]); // Atualiza a lista de resenhas sem recarregar
+      setNewReview(""); // Limpa o campo de texto
+    } catch (error) {
+      console.error("Erro ao enviar resenha:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Função para solicitar troca
   const handleRequestExchange = () => {
     setModalOpen(true);
     setIsSuccess(false);
   };
 
-  const handleConfirmExchange = () => {
-    // Simular API call para solicitar troca
-    setTimeout(() => {
-      setIsSuccess(true);
-      setExchangeRequested(true);
-    }, 500);
-  };
-
-  const handleSendReview = async () => {
-    if (!book) return;
-
-    const userId = localStorage.getItem("userId"); // Pegando o ID do usuário logado
-
+  // Confirmação da troca
+  const handleConfirmExchange = async () => {
+    const userId = localStorage.getItem("userId");
     if (!userId) {
-      alert("Você precisa estar logado para enviar uma resenha!");
+      alert("Erro: Usuário não autenticado.");
       return;
     }
 
-    const reviewData = {
-      usuario_id: parseInt(userId, 10),
-      livro_id: book.id,
-      avaliacao: newReview.avaliacao,
-      comentario: newReview.comentario,
-      data: new Date().toISOString().split("T")[0], // Formato YYYY-MM-DD
-    };
-
     try {
-      const response = await fetch("http://localhost:8080/avaliacoes", {
+      const response = await fetch("http://localhost:8080/trocas", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-        body: JSON.stringify(reviewData),
+        body: JSON.stringify({
+          usuarioSolicitante: { id: parseInt(userId) },
+          livroSolicitado: { id: parseInt(id!) },
+          status: "Pendente",
+        }),
       });
 
       if (!response.ok) {
-        throw new Error("Erro ao enviar a resenha.");
+        throw new Error("Erro ao solicitar troca.");
       }
 
-      const savedReview = await response.json();
-      setReviews((prevReviews) => [...prevReviews, savedReview]);
-      setNewReview({ avaliacao: 5, comentario: "" });
+      setIsSuccess(true);
+      setExchangeRequested(true);
     } catch (error) {
-      console.error("Erro ao enviar resenha:", error);
+      console.error("Erro ao solicitar troca:", error);
     }
   };
 
-  if (!book) return <p className="text-center text-[#594a42]">Carregando...</p>;
+  if (!book) return <p className="text-center text-lg">Carregando livro...</p>;
 
   return (
     <div className="max-w-7xl mx-auto">
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <div className="p-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">{book.titulo}</h1>
-          <p className="text-xl text-gray-600">{book.autor}</p>
-          <p className="text-gray-700 mt-4">{book.descricao}</p>
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <h1 className="text-3xl font-bold text-gray-900">{book.titulo}</h1>
+        <p className="text-xl text-gray-600 mb-4">{book.autor}</p>
+        <p className="text-gray-700 mb-6">{book.editor}</p>
+        <p className="text-gray-700 mb-6">
+          Estado de Conservação: <strong>{book.estadoConservacao}</strong>
+        </p>
 
-          <div className="mt-4 text-gray-700">
-            <p>
-              <strong>Estado de Conservação:</strong> {book.estado_conservacao}
-            </p>
-            <p>
-              <strong>ID do Dono:</strong> {book.usuario_id}
-            </p>
-          </div>
-
-          <div className="flex space-x-4 mt-6">
-            <button
-              className={`flex-1 px-6 py-3 rounded-lg flex items-center justify-center transition-colors ${
-                exchangeRequested
-                  ? "bg-green-100 text-green-800 border border-green-600 cursor-not-allowed"
-                  : "bg-indigo-600 text-white hover:bg-indigo-700"
-              }`}
-              onClick={handleRequestExchange}
-              disabled={exchangeRequested}
-            >
-              <BookOpen className="h-5 w-5 mr-2" />
-              {exchangeRequested ? "Troca Solicitada" : "Solicitar Troca"}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Avaliações */}
-      <div className="mt-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Avaliações</h2>
-        <div className="space-y-6">
-          {reviews.length > 0 ? (
-            reviews.map((review) => (
-              <div key={review.id} className="bg-white rounded-lg shadow-md p-6">
-                <div className="flex items-center mb-4">
-                  <div className="ml-3">
-                    <p className="font-medium">Usuário {review.usuario_id}</p>
-                    <div className="flex items-center">
-                      {Array.from({ length: review.avaliacao }).map((_, i) => (
-                        <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />
-                      ))}
-                    </div>
-                  </div>
-                  <span className="ml-auto text-sm text-gray-500">{review.data}</span>
-                </div>
-                <p className="text-gray-700">{review.comentario}</p>
-              </div>
-            ))
-          ) : (
-            <p className="text-gray-600">Nenhuma avaliação para este livro.</p>
-          )}
-        </div>
-      </div>
-
-      {/* Formulário para enviar resenha */}
-      <div className="mt-8 bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Deixe sua avaliação</h2>
-        <div className="space-y-4">
-          <select
-            className="w-full border rounded-lg p-2"
-            value={newReview.avaliacao}
-            onChange={(e) => setNewReview({ ...newReview, avaliacao: Number(e.target.value) })}
-          >
-            <option value={5}>5 - Excelente</option>
-            <option value={4}>4 - Muito Bom</option>
-            <option value={3}>3 - Bom</option>
-            <option value={2}>2 - Regular</option>
-            <option value={1}>1 - Ruim</option>
-          </select>
-          <textarea
-            className="w-full border rounded-lg p-2"
-            rows={3}
-            placeholder="Escreva sua resenha..."
-            value={newReview.comentario}
-            onChange={(e) => setNewReview({ ...newReview, comentario: e.target.value })}
-          />
+        {/* Seção de Ações */}
+        <div className="flex space-x-4">
           <button
-            className="vintage-button w-full text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
-            onClick={handleSendReview}
+            className={`flex-1 px-6 py-3 rounded-lg flex items-center justify-center transition-colors ${
+              exchangeRequested
+                ? "bg-green-100 text-green-800 border border-green-600 cursor-not-allowed"
+                : "bg-indigo-600 text-white hover:bg-indigo-700"
+            }`}
+            onClick={handleRequestExchange}
+            disabled={exchangeRequested}
           >
-            Enviar Resenha
+            <BookOpen className="h-5 w-5 mr-2" />
+            {exchangeRequested ? "Troca Solicitada" : "Solicitar Troca"}
+          </button>
+          <button className="flex-1 border border-indigo-600 text-indigo-600 px-6 py-3 rounded-lg hover:bg-indigo-50 transition-colors flex items-center justify-center">
+            <MessageCircle className="h-5 w-5 mr-2" />
+            Enviar Mensagem
           </button>
         </div>
       </div>
 
+      {/* Seção de Resenhas */}
+      <div className="mt-8">
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">Resenhas</h2>
+        <div className="space-y-4">
+          {reviews.length > 0 ? (
+            reviews.map((review) => (
+              <div key={review.id} className="bg-gray-100 p-4 rounded-lg">
+                <p className="font-semibold">{review.usuario.nome}</p>
+                <p className="text-sm text-gray-600">{review.dataPublicacao}</p>
+                <p className="mt-2">{review.conteudo}</p>
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-500">Nenhuma resenha ainda.</p>
+          )}
+        </div>
+
+        {/* Formulário para adicionar resenha */}
+        <form onSubmit={handleReviewSubmit} className="mt-6">
+          <textarea
+            className="w-full p-2 border border-gray-300 rounded-lg"
+            placeholder="Escreva sua resenha..."
+            value={newReview}
+            onChange={(e) => setNewReview(e.target.value)}
+            required
+          />
+          <button
+            type="submit"
+            className="mt-3 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Enviando..." : "Enviar Resenha"}
+          </button>
+        </form>
+      </div>
+
+      {/* Modal de Troca */}
       <ExchangeModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
         bookTitle={book.titulo}
-        ownerName={`Usuário ${book.usuario_id}`}
+        ownerName="Proprietário"
         onConfirm={handleConfirmExchange}
         isSuccess={isSuccess}
       />
