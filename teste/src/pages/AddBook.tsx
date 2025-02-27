@@ -7,7 +7,7 @@ export default function AddBook() {
     titulo: '',
     autor: '',
     editor: '',
-    estado_conservacao: 'Ótimo',
+    estado_conservacao: '', // Agora é um campo de texto
     usuario_id: localStorage.getItem("userId") || '' // Pegando ID do usuário logado
   });
 
@@ -15,7 +15,7 @@ export default function AddBook() {
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState('');
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setBookData(prev => ({ ...prev, [name]: value }));
   };
@@ -41,7 +41,7 @@ export default function AddBook() {
           titulo: bookData.titulo,
           autor: bookData.autor,
           editor: bookData.editor,
-          estado_conservacao: bookData.estado_conservacao, // ✅ Enviando corretamente
+          estado_conservacao: bookData.estado_conservacao, // ✅ Enviando corretamente como texto
           usuario_id: bookData.usuario_id // ✅ Pegando o usuário logado
         })
       });
@@ -56,11 +56,10 @@ export default function AddBook() {
         titulo: '',
         autor: '',
         editor: '',
-        estado_conservacao: 'Ótimo',
+        estado_conservacao: '',
         usuario_id: bookData.usuario_id
       });
     } catch (error) {
-    
       setModalOpen(true);
       setIsSuccess(false);
     }
@@ -128,19 +127,15 @@ export default function AddBook() {
             <label htmlFor="estado_conservacao" className="block text-sm font-serif font-medium text-[#2c1810] mb-1">
               Estado de Conservação
             </label>
-            <select
+            <input
+              type="text"
               id="estado_conservacao"
               name="estado_conservacao"
               value={bookData.estado_conservacao}
               onChange={handleChange}
               className="vintage-input block w-full px-3 py-2 rounded-lg"
               required
-            >
-              <option value="Novo">Novo</option>
-              <option value="Ótimo">Ótimo</option>
-              <option value="Bom">Bom</option>
-              <option value="Regular">Regular</option>
-            </select>
+            />
           </div>
 
           <div className="flex justify-center pt-4">

@@ -35,7 +35,7 @@ export default function ExchangeModal({
             <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
               <Check className="h-8 w-8 text-green-600" />
             </div>
-            <h3 className="text-xl font-serif font-bold text-[#2c1810] mb-2">Solicitação Enviada!</h3>
+            <h3 className="text-xl font-serif font-bold text-[#2c1810] mb-2">Livro adcionado!</h3>
             <p className="text-[#594a42] font-serif mb-6">
               O livro foi adcionado com sucesso.
 
