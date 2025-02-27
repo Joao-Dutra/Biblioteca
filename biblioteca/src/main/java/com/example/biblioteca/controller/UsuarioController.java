@@ -70,5 +70,13 @@ public class UsuarioController {
         }
         return ResponseEntity.ok(usuario);
     }
-
+    @PostMapping("/registro")
+    public ResponseEntity<String> registrarUsuario(@RequestBody Usuario usuario) {
+        try {
+            usuarioRepository.save(usuario); // Salva no banco de dados
+            return ResponseEntity.ok("Usuário registrado com sucesso!");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Erro ao registrar usuário: " + e.getMessage());
+        }
+    }
 }

@@ -93,6 +93,7 @@ export default function Exchanges() {
                 >
                   Ver Detalhes
                 </Link>
+                
               </div>
             </div>
           </div>

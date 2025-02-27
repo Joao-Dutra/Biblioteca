@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Book, User, PlusCircle, Repeat } from 'lucide-react';
+import { Book, User, PlusCircle, Repeat, LogIn} from 'lucide-react';
 
 export default function Navbar() {
   // Assuming user is always logged in for this implementation
@@ -27,10 +27,17 @@ export default function Navbar() {
               <Repeat className="h-5 w-5 mr-1" />
               Trocas
             </Link>
-            <Link to="/login" className="flex items-center text-[#f8f3e7] hover:text-[#d4a373] transition-colors font-serif">
-              <User className="h-5 w-5 mr-1" />
+            <Link to="/profile" className="flex items-center text-[#f8f3e7] hover:text-[#d4a373] transition-colors font-serif">
+            <User className="h-5 w-5 mr-1" />
               Perfil
             </Link>
+            <Link to="/login" className="flex items-center text-[#f8f3e7] hover:text-[#d4a373] transition-colors font-serif">
+              
+              <LogIn className="h-5 w-5 mr-1" />
+             Login
+            </Link>
+  
+            
           </div>
         </div>
       </div>

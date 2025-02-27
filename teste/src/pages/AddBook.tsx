@@ -60,7 +60,7 @@ export default function AddBook() {
         usuario_id: bookData.usuario_id
       });
     } catch (error) {
-      setError(error.message);
+    
       setModalOpen(true);
       setIsSuccess(false);
     }
