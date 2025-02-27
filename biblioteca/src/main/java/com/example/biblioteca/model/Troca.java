@@ -1,8 +1,6 @@
 package com.example.biblioteca.model;
 
-import jakarta.persistence.Entity;
 import jakarta.persistence.*;
-
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -10,33 +8,32 @@ import java.time.LocalDateTime;
 import javax.annotation.processing.Generated;
 
 @Entity
-
 public class Troca {
-    @Id 
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)  
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "livroSolicitado_id")
-    private Livro livro;
 
     @ManyToOne
-    @JoinColumn(name = "solicitante_id")
-    private Usuario usuario;
+    @JoinColumn(name = "livroSolicitado_id", nullable = false)
+    private Livro livroSolicitado;
 
     @ManyToOne
-    @JoinColumn(name = "proprietario_id") 
+    @JoinColumn(name = "solicitante_id", nullable = false)
+    private Usuario solicitante;
+
+    @ManyToOne
+    @JoinColumn(name = "proprietario_id", nullable = false)
     private Usuario proprietario;
 
     private String status;
-
     private LocalDateTime dataSolicitacao;
-
     private LocalDate dataConclusao;
-    
+
     @PrePersist
     protected void onCreate() {
         dataSolicitacao = LocalDateTime.now();
+        status = "Pendente";
     }
 
     public Long getId() {
@@ -47,20 +44,20 @@ public class Troca {
         this.id = id;
     }
 
-    public Livro getLivro() {
-        return livro;
+    public Livro getLivroSolicitado() {
+        return livroSolicitado;
     }
 
-    public void setLivro(Livro livro) {
-        this.livro = livro;
+    public void setLivroSolicitado(Livro livroSolicitado) {
+        this.livroSolicitado = livroSolicitado;
     }
 
-    public Usuario getUsuario() {
-        return usuario;
+    public Usuario getSolicitante() {
+        return solicitante;
     }
 
-    public void setUsuario(Usuario usuario) {
-        this.usuario = usuario;
+    public void setSolicitante(Usuario solicitante) {
+        this.solicitante = solicitante;
     }
 
     public Usuario getProprietario() {
@@ -94,6 +91,4 @@ public class Troca {
     public void setDataConclusao(LocalDate dataConclusao) {
         this.dataConclusao = dataConclusao;
     }
-
-    
 }
