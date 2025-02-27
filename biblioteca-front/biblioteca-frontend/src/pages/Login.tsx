@@ -1,40 +1,43 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Mail, Lock, LogIn } from "lucide-react";
-import { API_URL } from "../../api";    
+import { API_URL } from "../../api"; // Certifique-se de que API_URL está correto
 
 export default function Login() {
   // Estados para armazenar email, senha e erro
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [senha, setSenha] = useState(""); // Alterado para "senha" (igual ao backend)
   const [error, setError] = useState("");
 
   const navigate = useNavigate(); // Para redirecionar o usuário
 
   // Função de envio do formulário (chama a API)
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Evita recarregar a página
-    setError(""); // Reseta o erro antes da requisição
-
+    e.preventDefault();
+    setError("");
+  
     try {
-      const response = await fetch(`${API_URL}/auth/login`, {
+      const response = await fetch(`http://localhost:8080/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, senha: senha}), 
       });
-
+  
       if (!response.ok) {
-        throw new Error("Credenciais inválidas!");
+        const errorMessage = await response.text();
+        throw new Error(`Erro ${response.status}: ${errorMessage}`);
       }
-
+  
       const data = await response.json();
-      localStorage.setItem("token", data.token); // Salva o token para futuras requisições
-      navigate("/profile"); // Redireciona para o perfil após login bem-sucedido
+      localStorage.setItem("userEmail", data.email);
+      localStorage.setItem("token", data.token);
+      navigate(`/profile/${data.email}`);
     } catch (err) {
-      setError(err.message); // Exibe a mensagem de erro
+      console.error("Erro no login:", err.message);
+      setError(err.message);
     }
   };
-
+  
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
@@ -65,16 +68,16 @@ export default function Login() {
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="senha" className="block text-sm font-medium text-gray-700 mb-1">
               Senha
             </label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
                 type="password"
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                id="senha"
+                value={senha}
+                onChange={(e) => setSenha(e.target.value)}
                 className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
                 placeholder="••••••••"
                 required

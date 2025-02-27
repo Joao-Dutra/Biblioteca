@@ -2,6 +2,8 @@ package com.example.biblioteca.controller;
 
 import com.example.biblioteca.service.UsuarioService;
 import com.example.biblioteca.model.Usuario;
+import com.example.biblioteca.repository.UsuarioRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,12 +12,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
+@CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/usuarios")
 public class UsuarioController {
     @Autowired
     private UsuarioService usuarioService;
-
+    
     @GetMapping
     public List<Usuario> listarTodos() {
         return usuarioService.listarTodos();
@@ -50,6 +53,22 @@ public class UsuarioController {
         }
         usuarioService.deletar(id);
         return ResponseEntity.noContent().build();
+    }
+    private final UsuarioRepository usuarioRepository;
+
+    public UsuarioController(UsuarioRepository usuarioRepository) {
+        this.usuarioRepository = usuarioRepository;
+    }
+
+    // Novo endpoint: Buscar usuário pelo email
+   
+    @GetMapping("/email/{email}")
+    public ResponseEntity<Usuario> buscarPorEmail(@PathVariable String email) {
+        Usuario usuario = usuarioService.buscarPorEmail(email);
+        if (usuario == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(usuario);
     }
 
 }
