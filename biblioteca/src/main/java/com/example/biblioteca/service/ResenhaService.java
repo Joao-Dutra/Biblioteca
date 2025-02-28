@@ -12,10 +12,11 @@ import com.example.biblioteca.repository.ResenhaRepository;
 import java.nio.file.OpenOption;
 import java.util.List;
 import java.util.Optional;
+
 @Service
 
 public class ResenhaService {
-    
+
     @Autowired
     private ResenhaRepository resenhaRepository;
 
@@ -25,6 +26,10 @@ public class ResenhaService {
 
     public Optional<Resenha> buscarPorId(Long id) {
         return resenhaRepository.findById(id);
+    }
+
+    public List<Resenha> buscarPorLivroId(Long livroId) {
+        return resenhaRepository.findByLivroId(livroId);
     }
 
     public Resenha salvar(Resenha resenha) {

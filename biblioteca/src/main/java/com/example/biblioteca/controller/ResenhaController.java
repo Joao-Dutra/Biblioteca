@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+
 @CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/resenhas") // Define a URL base para este controlador
@@ -38,7 +39,17 @@ public class ResenhaController {
     public ResponseEntity<Resenha> buscarPorId(@PathVariable Long id) {
         Optional<Resenha> resenha = resenhaService.buscarPorId(id);
         return resenha.map(ResponseEntity::ok)
-                      .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    // 2️⃣ Buscar uma resenha por livro (GET /resenhas/livro/{livroId})
+    @GetMapping("/livro/{livroId}")
+    public ResponseEntity<List<Resenha>> buscarPorLivroId(@PathVariable Long livroId) {
+        List<Resenha> resenhas = resenhaService.buscarPorLivroId(livroId);
+        if (resenhas.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(resenhas);
     }
 
     // 3️⃣ Criar uma nova resenha (POST /resenhas)
@@ -50,24 +61,23 @@ public class ResenhaController {
         if (resenha.getLivro() == null || resenha.getLivro().getId() == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Erro: O livro é obrigatório.");
         }
-    
+
         Optional<Usuario> usuario = usuarioService.buscarPorId(resenha.getUsuario().getId());
         Optional<Livro> livro = livroService.buscarPorId(resenha.getLivro().getId());
-    
+
         if (!usuario.isPresent()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Erro: Usuário não encontrado.");
         }
         if (!livro.isPresent()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Erro: Livro não encontrado.");
         }
-    
+
         resenha.setUsuario(usuario.get());
         resenha.setLivro(livro.get());
-    
+
         Resenha novaResenha = resenhaService.salvar(resenha);
         return ResponseEntity.status(HttpStatus.CREATED).body(novaResenha);
     }
-    
 
     // 4️⃣ Atualizar uma resenha (PUT /resenhas/{id})
     @PutMapping("/{id}")
