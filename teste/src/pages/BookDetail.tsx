@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { Star, BookOpen, MessageCircle, RefreshCw } from "lucide-react";
+import { BookOpen, MessageCircle } from "lucide-react";
 import ExchangeModal from "../components/ExchangeModal";
 
 interface Review {
@@ -88,10 +88,18 @@ export default function BookDetail() {
   // Confirmação da troca
   const handleConfirmExchange = async () => {
     const userId = localStorage.getItem("userId");
+
     if (!userId) {
       alert("Erro: Usuário não autenticado.");
       return;
     }
+
+    if (!book || !book.usuario || !book.usuario.id) {
+      alert("Erro: Proprietário do livro não encontrado.");
+      return;
+    }
+
+    const proprietarioId = book.usuario.id; // Obtém o ID do dono do livro
 
     try {
       const response = await fetch("http://localhost:8080/trocas", {
@@ -101,14 +109,16 @@ export default function BookDetail() {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
         body: JSON.stringify({
-          usuarioSolicitante: { id: parseInt(userId) },
-          livroSolicitado: { id: parseInt(id!) },
+          solicitante: { id: parseInt(userId) }, // Quem está solicitando a troca
+          proprietario: { id: proprietarioId }, // O dono do livro
+          livroSolicitado: { id: parseInt(id!) }, // O livro que está sendo solicitado
           status: "Pendente",
         }),
       });
 
       if (!response.ok) {
-        throw new Error("Erro ao solicitar troca.");
+        const errorMessage = await response.text();
+        throw new Error(`Erro ao solicitar troca: ${errorMessage}`);
       }
 
       setIsSuccess(true);

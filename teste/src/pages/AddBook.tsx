@@ -1,49 +1,59 @@
-import React, { useState } from 'react';
-import { Book } from 'lucide-react';
-import ExchangeModal from '../components/AddModal'; // Reutilizando o modal do Exchange
+import React, { useState, useEffect } from "react";
+import { Book } from "lucide-react";
+import ExchangeModal from "../components/AddModal"; // Reutilizando o modal
 
 export default function AddBook() {
+  const [userId, setUserId] = useState<number | null>(null);
+
+  useEffect(() => {
+    const storedUserId = localStorage.getItem("userId");
+    if (storedUserId) {
+      setUserId(parseInt(storedUserId)); // Converte para número e armazena no estado
+    } else {
+      alert("Erro: Usuário não autenticado. Faça login novamente.");
+    }
+  }, []);
+
   const [bookData, setBookData] = useState({
-    titulo: '',
-    autor: '',
-    editor: '',
-    estado_conservacao: '', // Agora é um campo de texto
-    usuario_id: localStorage.getItem("userId") || '' // Pegando ID do usuário logado
+    titulo: "",
+    autor: "",
+    editor: "",
+    estadoConservacao: "",
   });
 
   const [modalOpen, setModalOpen] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setBookData(prev => ({ ...prev, [name]: value }));
+    setBookData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
-    if (!bookData.usuario_id) {
-      setError('Erro: ID do usuário não encontrado. Faça login novamente.');
+    if (!userId) {
+      setError("Erro: ID do usuário não encontrado. Faça login novamente.");
       setModalOpen(true);
       return;
     }
 
     try {
-      const response = await fetch('http://localhost:8080/livros', {
-        method: 'POST',
+      const response = await fetch("http://localhost:8080/livros", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem("token")}` // Se a API exigir autenticação
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`, // Se a API exigir autenticação
         },
         body: JSON.stringify({
           titulo: bookData.titulo,
           autor: bookData.autor,
           editor: bookData.editor,
-          estado_conservacao: bookData.estado_conservacao, // ✅ Enviando corretamente como texto
-          usuario_id: bookData.usuario_id // ✅ Pegando o usuário logado
-        })
+          estadoConservacao: bookData.estadoConservacao, // Nome compatível com o banco
+          usuarioId: userId, // ✅ Agora pega corretamente o ID do usuário logado
+        }),
       });
 
       if (!response.ok) {
@@ -53,11 +63,10 @@ export default function AddBook() {
       setIsSuccess(true);
       setModalOpen(true);
       setBookData({
-        titulo: '',
-        autor: '',
-        editor: '',
-        estado_conservacao: '',
-        usuario_id: bookData.usuario_id
+        titulo: "",
+        autor: "",
+        editor: "",
+        estadoConservacao: "",
       });
     } catch (error) {
       setModalOpen(true);
@@ -68,7 +77,9 @@ export default function AddBook() {
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-8 text-center">
-        <h1 className="text-4xl font-serif font-bold text-[#2c1810]">Adicionar Novo Livro</h1>
+        <h1 className="text-4xl font-serif font-bold text-[#2c1810]">
+          Adicionar Novo Livro
+        </h1>
         <p className="text-[#594a42] font-serif mt-2">
           Compartilhe um livro da sua coleção para troca
         </p>
@@ -78,7 +89,10 @@ export default function AddBook() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid md:grid-cols-2 gap-6">
             <div>
-              <label htmlFor="titulo" className="block text-sm font-serif font-medium text-[#2c1810] mb-1">
+              <label
+                htmlFor="titulo"
+                className="block text-sm font-serif font-medium text-[#2c1810] mb-1"
+              >
                 Título do Livro
               </label>
               <input
@@ -93,7 +107,10 @@ export default function AddBook() {
             </div>
 
             <div>
-              <label htmlFor="autor" className="block text-sm font-serif font-medium text-[#2c1810] mb-1">
+              <label
+                htmlFor="autor"
+                className="block text-sm font-serif font-medium text-[#2c1810] mb-1"
+              >
                 Autor
               </label>
               <input
@@ -109,7 +126,10 @@ export default function AddBook() {
           </div>
 
           <div>
-            <label htmlFor="editor" className="block text-sm font-serif font-medium text-[#2c1810] mb-1">
+            <label
+              htmlFor="editor"
+              className="block text-sm font-serif font-medium text-[#2c1810] mb-1"
+            >
               Edição
             </label>
             <input
@@ -124,14 +144,17 @@ export default function AddBook() {
           </div>
 
           <div>
-            <label htmlFor="estado_conservacao" className="block text-sm font-serif font-medium text-[#2c1810] mb-1">
+            <label
+              htmlFor="estadoConservacao"
+              className="block text-sm font-serif font-medium text-[#2c1810] mb-1"
+            >
               Estado de Conservação
             </label>
             <input
               type="text"
-              id="estado_conservacao"
-              name="estado_conservacao"
-              value={bookData.estado_conservacao}
+              id="estadoConservacao"
+              name="estadoConservacao"
+              value={bookData.estadoConservacao}
               onChange={handleChange}
               className="vintage-input block w-full px-3 py-2 rounded-lg"
               required
@@ -150,7 +173,7 @@ export default function AddBook() {
         </form>
       </div>
 
-      {/* Popup de confirmação (reutilizando o ExchangeModal) */}
+      {/* Popup de confirmação */}
       {modalOpen && (
         <ExchangeModal
           isOpen={modalOpen}

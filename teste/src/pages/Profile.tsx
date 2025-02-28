@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { BookOpen, RefreshCw, Star, Calendar, Mail } from "lucide-react";
+import { useNavigate, useParams } from "react-router-dom";
+import { BookOpen, Calendar, Mail } from "lucide-react";
 
 interface User {
   id: number;
@@ -19,26 +19,37 @@ interface Book {
 
 export default function Profile() {
   const navigate = useNavigate();
+  const { email } = useParams(); // Captura o email da URL
   const [user, setUser] = useState<User | null>(null);
   const [books, setBooks] = useState<Book[]>([]);
-
+  
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
+    let userEmail = email || localStorage.getItem("userEmail");
 
-    if (!storedUser) {
-      navigate("/login"); // Se não tiver usuário logado, redireciona para login
+    if (!userEmail) {
+      navigate("/login");
       return;
     }
 
-    const parsedUser: User = JSON.parse(storedUser);
-    setUser(parsedUser);
+    // Se a URL não tem o email, redireciona para a URL correta
+    if (!email) {
+      navigate(`/profile/${userEmail}`, { replace: true });
+      return;
+    }
 
-    // Busca os livros do usuário pelo ID armazenado no localStorage
-    fetch(`http://localhost:8080/livros/usuario/${parsedUser.id}`)
+    // Buscar os dados do usuário pelo email
+    fetch(`http://localhost:8080/usuarios/email/${userEmail}`)
       .then((response) => response.json())
-      .then((data: Book[]) => setBooks(data))
-      .catch((error) => console.error("Erro ao buscar livros:", error));
-  }, [navigate]);
+      .then((data: User) => {
+        setUser(data);
+
+        // Buscar os livros do usuário pelo ID
+        return fetch(`http://localhost:8080/livros/usuario/${data.id}`);
+      })
+      .then((response) => response.json())
+      .then((booksData: Book[]) => setBooks(booksData))
+      .catch((error) => console.error("Erro ao buscar dados:", error));
+  }, [email, navigate]);
 
   if (!user) return <p className="text-center text-[#594a42]">Carregando...</p>;
 
@@ -62,7 +73,8 @@ export default function Profile() {
             <button
               className="mt-6 w-full bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
               onClick={() => {
-                localStorage.removeItem("user"); // Remove usuário do localStorage
+                localStorage.removeItem("userEmail");
+                localStorage.removeItem("token");
                 navigate("/login");
               }}
             >
