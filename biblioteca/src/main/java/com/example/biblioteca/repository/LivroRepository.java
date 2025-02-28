@@ -6,7 +6,7 @@ import com.example.biblioteca.model.Livro;
 
 @Repository
 public interface LivroRepository extends JpaRepository<Livro, Long> {
-
+    
     
     
 }
