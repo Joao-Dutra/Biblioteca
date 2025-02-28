@@ -32,34 +32,36 @@ export default function AddBook() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-
+  
     if (!userId) {
-      setError("Erro: ID do usuário não encontrado. Faça login novamente.");
-      setModalOpen(true);
+      alert("Erro: ID do usuário não encontrado. Faça login novamente.");
       return;
     }
-
+  
+    const livro = {
+      titulo: bookData.titulo,
+      autor: bookData.autor,
+      editor: bookData.editor,
+      estadoConservacao: bookData.estadoConservacao,
+      usuarioId: userId,
+    };
+  
+    console.log("Enviando para API:", livro); // 🚀 Check the console
+  
     try {
-      const response = await fetch("http://localhost:8080/livros", {
+      const response = await fetch("http://localhost:8080/livros/adicionar", { // ✅ Updated URL
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`, // Se a API exigir autenticação
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-        body: JSON.stringify({
-          titulo: bookData.titulo,
-          autor: bookData.autor,
-          editor: bookData.editor,
-          estadoConservacao: bookData.estadoConservacao, // Nome compatível com o banco
-          usuarioId: userId, // ✅ Agora pega corretamente o ID do usuário logado
-        }),
+        body: JSON.stringify(livro),
       });
-
+  
       if (!response.ok) {
         throw new Error(`Erro ao adicionar livro: ${await response.text()}`);
       }
-
+  
       setIsSuccess(true);
       setModalOpen(true);
       setBookData({
@@ -69,10 +71,11 @@ export default function AddBook() {
         estadoConservacao: "",
       });
     } catch (error) {
-      setModalOpen(true);
+      console.error("Erro ao adicionar livro:", error);
       setIsSuccess(false);
     }
   };
+  
 
   return (
     <div className="max-w-4xl mx-auto">
