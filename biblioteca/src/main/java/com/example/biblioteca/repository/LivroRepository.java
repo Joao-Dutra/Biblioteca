@@ -16,5 +16,6 @@ public interface LivroRepository extends JpaRepository<Livro, Long> {
     Optional findById(Long id);
      @Query("SELECT l FROM Livro l JOIN FETCH l.usuario")
     List<Livro> findAllWithUsers();
-    
+    List<Livro> findByUsuario(Usuario usuario);
+
 }

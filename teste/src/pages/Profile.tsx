@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { BookOpen, Calendar, Mail } from "lucide-react";
+import { Mail, Calendar, BookOpen } from "lucide-react";
 
 interface User {
   id: number;
@@ -13,45 +13,33 @@ interface Book {
   id: number;
   titulo: string;
   autor: string;
-  estado_conservacao: string;
-  usuario_id: number;
+  estadoConservacao: string;
 }
 
 export default function Profile() {
+  const { email } = useParams(); // ✅ Captura o email da URL
   const navigate = useNavigate();
-  const { email } = useParams(); // Captura o email da URL
   const [user, setUser] = useState<User | null>(null);
   const [books, setBooks] = useState<Book[]>([]);
   
   useEffect(() => {
-    let userEmail = email || localStorage.getItem("userEmail");
+    if (!email) return;
 
-    if (!userEmail) {
-      navigate("/login");
-      return;
-    }
-
-    // Se a URL não tem o email, redireciona para a URL correta
-    if (!email) {
-      navigate(`/profile/${userEmail}`, { replace: true });
-      return;
-    }
-
-    // Buscar os dados do usuário pelo email
-    fetch(`http://localhost:8080/usuarios/email/${userEmail}`)
+    // ✅ Busca os dados do usuário pelo email
+    fetch(`http://localhost:8080/usuarios/email/${email}`)
       .then((response) => response.json())
       .then((data: User) => {
         setUser(data);
 
-        // Buscar os livros do usuário pelo ID
-        return fetch(`http://localhost:8080/livros/usuario/${data.id}`);
+        // ✅ Busca os livros do usuário
+        return fetch(`http://localhost:8080/livros/usuario/${email}`);
       })
       .then((response) => response.json())
       .then((booksData: Book[]) => setBooks(booksData))
       .catch((error) => console.error("Erro ao buscar dados:", error));
-  }, [email, navigate]);
+  }, [email]);
 
-  if (!user) return <p className="text-center text-[#594a42]">Carregando...</p>;
+  if (!user) return <p className="text-center text-lg">Carregando...</p>;
 
   return (
     <div className="max-w-7xl mx-auto p-6">
@@ -84,6 +72,8 @@ export default function Profile() {
 
           <div className="md:w-2/3 p-8">
             <h2 className="text-xl font-bold text-gray-900 mb-4">Meus Livros</h2>
+
+            {/* ✅ Listagem de Livros */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {books.length > 0 ? (
                 books.map((book) => (
@@ -92,7 +82,7 @@ export default function Profile() {
                       <h3 className="font-medium text-gray-900">{book.titulo}</h3>
                       <p className="text-sm text-gray-600">{book.autor}</p>
                       <span className="inline-block mt-2 text-sm px-2 py-1 bg-green-100 text-green-800 rounded">
-                        {book.estado_conservacao}
+                        {book.estadoConservacao}
                       </span>
                     </div>
                   </div>

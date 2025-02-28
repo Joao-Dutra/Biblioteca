@@ -85,4 +85,15 @@ public class LivroController {
 
         return ResponseEntity.ok(novoLivro);
     }
+    @GetMapping("/usuario/{email}")
+    public ResponseEntity<List<Livro>> listarLivrosPorUsuario(@PathVariable String email) {
+        Optional<Usuario> usuarioOptional = usuarioRepository.findByEmail(email);
+
+        if (usuarioOptional.isEmpty()) {
+            return ResponseEntity.badRequest().body(null);
+        }
+
+        List<Livro> livros = livroRepository.findByUsuario(usuarioOptional.get());
+        return ResponseEntity.ok(livros);
+    }
 }
