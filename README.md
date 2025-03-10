@@ -25,10 +25,7 @@ O projeto oferece uma interface interativa onde os usuários podem pesquisar liv
 - **Back-end**: Java com Spring Boot
 - **Banco de Dados**: MySQL
 - **API**: Comunicação entre front-end e back-end através de uma API RESTful.
-  
-## Estrutura do Banco de Dados
 
-O banco de dados MySQL tem as seguintes tabelas principais:
 
 ## Exemplo de Fluxo de Uso
 
