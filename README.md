@@ -41,8 +41,14 @@ O banco de dados MySQL tem as seguintes tabelas principais:
 6. Após a troca ser aceita, os usuários podem combinar o envio dos livros fisicamente.
 
 ## Imagens do projeto
+![image](https://github.com/user-attachments/assets/d8bbea6a-92f6-47bf-944e-c50ca025238b)
+*Tela de login*
 ![image](https://github.com/user-attachments/assets/2a55e091-b4e4-4508-87f0-2726150dece3)
+
 ![image](https://github.com/user-attachments/assets/5c1832a2-a05a-4b07-9845-922b7968449f)
+
 ![image](https://github.com/user-attachments/assets/b6b3c64c-e527-488c-a10a-3f1f4dab71ea)
+
 ![image](https://github.com/user-attachments/assets/26c175c7-cfae-4afc-a52d-0d1e7f94ef56)
+
 ![image](https://github.com/user-attachments/assets/a62e6d00-9654-4d6b-b04e-8e4138a19e0b)
