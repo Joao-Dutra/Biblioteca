@@ -18,7 +18,6 @@ O projeto oferece uma interface interativa onde os usuários podem pesquisar liv
   
 - **Pesquisas e Filtros**: Os usuários podem pesquisar livros por título, autor ou categoria, e aplicar filtros para encontrar livros específicos para troca.
   
-- **Sistema de Notificações**: O sistema notifica os usuários sobre as trocas solicitadas, aceitas ou rejeitadas, mantendo a comunicação entre os membros da plataforma.
 
 ## Tecnologias Utilizadas
 
@@ -44,11 +43,12 @@ O banco de dados MySQL tem as seguintes tabelas principais:
 ![image](https://github.com/user-attachments/assets/d8bbea6a-92f6-47bf-944e-c50ca025238b)
 *Tela de login*
 ![image](https://github.com/user-attachments/assets/2a55e091-b4e4-4508-87f0-2726150dece3)
-
+*Home Page*
 ![image](https://github.com/user-attachments/assets/5c1832a2-a05a-4b07-9845-922b7968449f)
-
+*Tela usuario*
 ![image](https://github.com/user-attachments/assets/b6b3c64c-e527-488c-a10a-3f1f4dab71ea)
-
+*Tela para adicionar livro*
 ![image](https://github.com/user-attachments/assets/26c175c7-cfae-4afc-a52d-0d1e7f94ef56)
-
+*Tela de livros para trocas*
 ![image](https://github.com/user-attachments/assets/a62e6d00-9654-4d6b-b04e-8e4138a19e0b)
+*Tela de confirmação de troca junto com resenhas*
